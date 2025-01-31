@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Web3 Example</title>
+</head>
+<body>
+  <h1>Connect to Ganache with Web3.js</h1>
+  <button onclick="connect()">Connect</button>
+  <p id="status"></p>
+  <p id="candidate">candidate: </p>
+  <button id="getCandidate" >Who I Voted For</button>
+  <div  style="display:inline;">
+    <div >
+      <input  id="CandidateName" >
+      </input>
+      <span >
+        <button id="AddCandidate" >Who I Want To Vote For</button>
+      </span>
+    </div>
+  </div>
+        
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script>
+    var contractAbi =[
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "setName",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getName",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+
+    
+]
+
+var web3;
+var contractAddress="0xbe1b469e6aE75056850aA87a39091FB57fE15C3B"
+
+    async function connect() {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        web3 = new Web3(window.ethereum);
+        document.getElementById('status').innerText = 'Connected to MetaMask';
+
+        const accounts = await web3.eth.getAccounts();
+        document.getElementById('status').innerText = 'Connected: ' + accounts[0];
+      } else {
+        document.getElementById('status').innerText = 'Please install MetaMask!';
+      }
+    }
+    async function getCandidate(web3) {
+
+
+
+            const contract = new web3.eth.Contract(contractAbi, contractAddress);
+                        try {
+            const result = await contract.methods.getName().call();
+            console.log("Highest Bid:", result);
+            document.getElementById('candidate').innerText = `candidate: ${result}`;
+            } catch (error) {
+            console.error("Error calling getMessage:", error);
+            }
+        
+    }
+
+    async function setCandidate(web3) {
+
+
+
+                                            const contract = new web3.eth.Contract(contractAbi, contractAddress);
+                                                        try {
+
+                                            var inputField = document.getElementById("CandidateName");
+                                            // Get the value of the input field
+                                            var inputValue = inputField.value;
+                                            const accounts = await web3.eth.getAccounts();
+                                            console.log(accounts)
+
+                                            await contract.methods.setName(inputValue).send({
+                                            from: accounts[0], // The address making the transaction
+                                            gas: 3000000 // Optional: specify the gas limit
+                                            });
+
+                                            } catch (error) {
+                                            console.error("Error calling getMessage:", error);
+
+                                        }
+                                    }
+    window.addEventListener('load', async () => {
+            await connect();
+
+            
+           
+            document.getElementById('getCandidate').addEventListener('click', async () => {
+
+                await getCandidate(web3);
+            });
+
+            
+            document.getElementById('AddCandidate').addEventListener('click', async () => {
+
+                await setCandidate(web3);
+            });
+            
+        });
+
+  </script>
+</body>
+</html>
